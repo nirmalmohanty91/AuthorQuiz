@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
-import {Link} from 'react-router-dom';
+import { Link } from 'react-router-dom';
+//To connect a react component to a redux store
+import { connect } from 'react-redux';
 import logo from './logo.svg';
 import './App.css';
 import './bootstrap.min.css';
@@ -15,9 +17,9 @@ function Hero() {
   </div>);
 }
 
-function Turn({author,books, highlight, onAnswerSelected}) {
+function Turn({ author, books, highlight, onAnswerSelected }) {
 
-  function highlightToBgColor(highlight){
+  function highlightToBgColor(highlight) {
     const mapping = {
       'none': '',
       'correct': 'green',
@@ -31,34 +33,34 @@ function Turn({author,books, highlight, onAnswerSelected}) {
       <img src={author.imageUrl} className="authorimage" alt="Author" />
     </div>
     <div className="col-6">
-      {books.map(title => <Book title={title} key={title} onClick={onAnswerSelected}/>)}
+      {books.map(title => <Book title={title} key={title} onClick={onAnswerSelected} />)}
     </div>
 
   </div>);
 }
 
 Turn.propTypes = {
-author: PropTypes.shape({
-name: PropTypes.string.isRequired,
-imageUrl: PropTypes.string.isRequired,
-imageSource: PropTypes.string.isRequired,
-books: PropTypes.arrayOf(PropTypes.string).isRequired
-}),
-books: PropTypes.arrayOf(PropTypes.string).isRequired,
-highlight: PropTypes.string.isRequired,
-onAnswerSelected: PropTypes.func.isRequired
+  author: PropTypes.shape({
+    name: PropTypes.string.isRequired,
+    imageUrl: PropTypes.string.isRequired,
+    imageSource: PropTypes.string.isRequired,
+    books: PropTypes.arrayOf(PropTypes.string).isRequired
+  }),
+  books: PropTypes.arrayOf(PropTypes.string).isRequired,
+  highlight: PropTypes.string.isRequired,
+  onAnswerSelected: PropTypes.func.isRequired
 
 }
 
 
 
-function Continue({show, onContinue}) {
+function Continue({ show, onContinue }) {
 
   return (<div className="row continue">
-    {show?<div className="col-11">
+    {show ? <div className="col-11">
       <button className="btn btn-primary btn-lg float-right" onClick={onContinue}>Continue</button>
-      </div>:null}
-    </div>);
+    </div> : null}
+  </div>);
 }
 
 function Footer() {
@@ -71,43 +73,49 @@ function Footer() {
   </div>);
 }
 
-function Book({title, onClick}){
-  return (<div className="answer" onClick={()=>{
+function Book({ title, onClick }) {
+  return (<div className="answer" onClick={() => {
     onClick(title);
-    }}>
+  }}>
 
     <h4>{title}</h4>
   </div>);
 }
-/*
-class AuthorQuiz extends Component {
-  render() {
-    return (
-      <div className="container-fluid">
-        <Hero />
-        <Turn />
-        <Continue />
-        <Footer />
 
-      </div>
-    );
+
+function mapStateToProps(state) {
+  return {
+    turnData: state.turnData,
+    highlight: state.highlight
+  };
+}
+
+function mapDispatchToProps(dispatch) {
+  return {
+    onAnswerSelected: (answer) => {
+      dispatch({ type: 'ANSWER_SELECTED', answer });
+    },
+    onContinue: () => {
+      dispatch({ type: 'CONTINUE' });
+    }
+
   }
 }
-*/
 
-function AuthorQuiz ({turnData, highlight, onAnswerSelected, onContinue}) {
- 
-    return (
-      <div className="container-fluid">
-        <Hero />
-        <Turn {...turnData} highlight={highlight} onAnswerSelected={onAnswerSelected}/>
-        <Continue show={highlight === 'correct'} onContinue={onContinue}/>
-        <p><Link to="/add">Add an Author</Link></p>
-        <Footer />
 
-      </div>
-    );
-  
-}
+const AuthorQuiz = connect(mapStateToProps, mapDispatchToProps)(function ({ turnData, highlight, onAnswerSelected, onContinue }) {
+
+  return (
+    <div className="container-fluid">
+      <Hero />
+      <Turn {...turnData} highlight={highlight} onAnswerSelected={onAnswerSelected} />
+      <Continue show={highlight === 'correct'} onContinue={onContinue} />
+      <p><Link to="/add">Add an Author</Link></p>
+      <Footer />
+
+    </div>
+  );
+
+})
 
 export default AuthorQuiz;
